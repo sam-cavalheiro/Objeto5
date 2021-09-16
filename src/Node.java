@@ -2,26 +2,29 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class Node {
-	public Point point;
-	private boolean isSelected;
+	public Rectangle rectangle;
+	private Color color = Color.white;
+	private int index;
+	//public Point point;
 	
 	public static final byte SIZE = 5;
 	
-	public Node(Point point) {
-		this.point = point;
+	public Node(Rectangle rectangle) {
+		this.rectangle = rectangle;
+		index = Main.lastNodeIndex++;
 	}
 	
-	public void setSelected(boolean isSelected) {
-		this.isSelected = isSelected;
+	public void setColor(Color color) {
+		this.color = color;
+	}
+	
+	public int getIndex() {
+		return index;
 	}
 	
 	public void paint(Graphics g) {
-		if (isSelected) {
-			g.setColor(Color.green);
-		}
-		else {
-			g.setColor(Color.white);	
-		}
-		g.fillRect(point.x, point.y, SIZE, SIZE);
+		g.setColor(color);
+		g.fillRect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
+		//g.fillRect(point.x, point.y, SIZE, SIZE);
 	}
 }
