@@ -224,6 +224,7 @@ public class QuadTree {
 	}
 	
 	public void paint(Graphics g) {
-		region.paint(g);
+		if (region != null)
+			region.paint(g);
 	}
 }

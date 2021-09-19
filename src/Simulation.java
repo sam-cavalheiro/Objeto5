@@ -1,5 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -12,6 +14,10 @@ public class Simulation {
 	private QuadTree quadTree;
 	private Particle[] particles = new Particle[600];
 	
+	private FileWriter file;
+	
+	private static final boolean USE_QUADTREE = true;
+	
 	public Simulation() {
 		int screenSize = 640;
 		
@@ -19,12 +25,20 @@ public class Simulation {
 		simulationPanel = new SimulationPanel(this);
 		
 		JFrame frame = new JFrame("Alisson, Laport e Sam - Objeto 5");
-		
 		frame.setSize(screenSize, screenSize);
 		//frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(simulationPanel);
 		frame.setVisible(true);
+		
+		try {
+			file = new FileWriter("speedup.txt");
+			file.write("Quantia de particulas:;" + particles.length + "\nQuadtree:;" + String.valueOf(USE_QUADTREE) + "\nTempo:");
+			file.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//region = new Region(new Rectangle(0, 0, screenSize, screenSize));
 		
@@ -43,25 +57,39 @@ public class Simulation {
 			particle.movement();
 		}
 		
-		// Sem QuadTree
-		/*for (Particle p1 : particles) {
-			//Main.interactions++;
-			for (Particle p2 : particles) {
-				if (p1 != p2 && p1.rectangle.intersect(p2.rectangle))
-					p2.setColor(Color.red);
-			}
-		}*/
+		long startTime = System.currentTimeMillis();
 		
-		// Com QuadTree
-		for (Particle particle : particles) {
-			for (Node node : quadTree.getNodesInRectangle(particle.rectangle)) {
-				if (node != particle)
-					node.setColor(Color.red);
+		if (USE_QUADTREE) {
+			for (Particle particle : particles) {
+				for (Node node : quadTree.getNodesInRectangle(particle.rectangle)) {
+					if (node != particle)
+						node.setColor(Color.red);
+				}
+			}
+		}
+		else {
+			for (Particle p1 : particles) {
+				for (Particle p2 : particles) {
+					if (p1 != p2 && p1.rectangle.intersect(p2.rectangle))
+						p2.setColor(Color.red);
+				}
 			}
 		}
 		
-		quadTree.build(particles);
+		long endTime = System.currentTimeMillis();
+		long executionTime = endTime - startTime;
 		
+		try {
+			file.write("\n" + String.valueOf(executionTime));
+			file.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (USE_QUADTREE)
+			quadTree.build(particles);
+			
 		//simulationPanel.invalidate();
 		//simulationPanel.validate();
 		simulationPanel.repaint();
