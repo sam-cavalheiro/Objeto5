@@ -2,38 +2,35 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Region {
 	private Rectangle rectangle;
-	private int index;
 	
 	private Region[] children;
 	//private List<Node> nodes = new ArrayList<Node>();
 	private Node[] nodes = new Node[MAX_NODES];
 	private int nodesCount = 0;
+	private int subdivisionStack;
 	
 	private static final int MAX_NODES = 2;
+	private static final int MAX_SUBDIVISION = 100;
 	
-	public Region(Rectangle rectangle) {
+	public Region(Rectangle rectangle, int subdivisionStack) {
 		this.rectangle = rectangle;
-		index = Main.lastRegionIndex++;
+		this.subdivisionStack = subdivisionStack;
 	}
 	
-	/*public void insertNode(Node node) {
+	public boolean insertNode(Node node) {
 		//if (rectangle.containsPoint(node.point)) {
 		if (rectangle.intersect(node.rectangle)) {
 			nodes[nodesCount++] = node;
-			
-			if (children != null) {
-				for (Region region : children) {
-					region.insertNode(node);
-				}	
-			}
+			return true;
 		}
-	}*/
+		
+		return false;
+	}
 	
-	public boolean tryAddNode(Node node) {
+	/*public boolean insertNode(Node node) {
 		//if (rectangle.containsPoint(node.point)) {
 		if (rectangle.intersect(node.rectangle)) {
 			
@@ -46,48 +43,42 @@ public class Region {
 			}
 			
 			for (Region region : children) {
-				region.tryAddNode(node);
-				/*if (region.tryAddNode(node))
-					return true;*/
+				region.insertNode(node);
 			}
 			
 			return true;
 		}
 		
 		return false;
-	}
+	}*/
 	
-	public void subdivide() {
+	public boolean subdivide() {
+		if (subdivisionStack >= MAX_SUBDIVISION)
+			return false;
+		
+		int _subdivisionStack = subdivisionStack + 1;
+		
 		int _x = rectangle.x;
 		int _y = rectangle.y;
 		int _w = rectangle.w / 2;
 		int _h = rectangle.h / 2;
 		
-		if (index == 2)
-			System.out.println("Original: " + rectangle.w + "\nRestante: " + _x + ", " + _y + " | " + _w + "x" + _h);
-		
 		children = new Region[] {
-				new Region(new Rectangle(_x, _y, _w, _h)),
-				new Region(new Rectangle(_x + _w, _y, _w, _h)),
-				new Region(new Rectangle(_x, _y + _h, _w, _h)),
-				new Region(new Rectangle(_x + _w, _y + _h, _w, _h))
+				new Region(new Rectangle(_x, _y, _w, _h), _subdivisionStack),
+				new Region(new Rectangle(_x + _w, _y, _w, _h), _subdivisionStack),
+				new Region(new Rectangle(_x, _y + _h, _w, _h), _subdivisionStack),
+				new Region(new Rectangle(_x + _w, _y + _h, _w, _h), _subdivisionStack)
 		};
 		
-		/*for (int i = 0; i < MAX_NODES; i++) {
-			Node n = nodes[i];
-			for (Region region : children)
-				if (region.tryAddNode(n))
-					break;
-		}*/
+		return true;
 	}
 	
 	public List<Node> getNodesInRectangle(Rectangle area) {
 		List<Node> _nodes = new ArrayList<Node>();
-		Main.interactions++;
+
 		if (rectangle.intersect(area)) {
 			//for (Node node : nodes) {
 			for (int i = 0; i < nodesCount; i++) {
-				Main.interactions++;
 				Node node = nodes[i];
 				if (area.intersect(node.rectangle))//(area.containsPoint(node.point))
 					_nodes.add(node);
@@ -103,7 +94,15 @@ public class Region {
 		return _nodes;
 	}
 	
-	public void recursivePrint() {
+	public Node[] getNodes() {
+		return nodes;
+	}
+	
+	public boolean reachedMaxNodesCount() {
+		return nodesCount == MAX_NODES;
+	}
+	
+	/*public void recursivePrint() {
 		String message = "---------\nRegion [" + index + "]:\n(" + rectangle.w + "x" + rectangle.h + ")";
 		for (int i = 0; i < nodesCount; i++)
 			message += "\n" + nodes[i].getIndex();
@@ -114,15 +113,16 @@ public class Region {
 			for (Region region : children)
 				region.recursivePrint();	
 		}
+	}*/
+	
+	public Region[] getChildren() { // só pra testes
+		return children;
 	}
 	
 	public void paint(Graphics g) {
 		g.setColor(Color.white);
+		//g.fillRect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
 		g.drawRect(rectangle.x, rectangle.y, rectangle.w, rectangle.h);
-		
-		// Agora são desenhados na classe principal
-		/*for (Node node : nodes)
-			node.paint(g);*/
 		
 		if (children != null) {
 			for (Region region : children)

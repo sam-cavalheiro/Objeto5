@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -46,7 +47,6 @@ public class Simulation {
 		/*for (Particle p1 : particles) {
 			//Main.interactions++;
 			for (Particle p2 : particles) {
-				Main.interactions++;
 				if (p1 != p2 && p1.rectangle.intersect(p2.rectangle))
 					p2.setColor(Color.red);
 			}
@@ -54,15 +54,11 @@ public class Simulation {
 		
 		// Com QuadTree
 		for (Particle particle : particles) {
-			Main.interactions++;
 			for (Node node : quadTree.getNodesInRectangle(particle.rectangle)) {
 				if (node != particle)
 					node.setColor(Color.red);
 			}
 		}
-		
-		System.out.println("Interações: " + Main.interactions);
-		Main.interactions = 0;
 		
 		quadTree.build(particles);
 		
